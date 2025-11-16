@@ -29,11 +29,19 @@ type StaffMember = {
   email: string;
 };
 
+type User = {
+  id: string;
+  full_name: string;
+  email: string;
+  role: "student" | "staff" | "admin";
+};
+
 export default function AdminDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -86,6 +94,23 @@ export default function AdminDashboard() {
         
         setStaffMembers(staffProfiles || []);
       }
+
+      // Fetch all users with their roles
+      const { data: allProfilesData } = await supabase
+        .from("profiles")
+        .select("id, full_name, email");
+      
+      const { data: allRolesData } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+      
+      const roleMap = new Map(allRolesData?.map(r => [r.user_id, r.role]) || []);
+      const usersWithRoles = allProfilesData?.map(p => ({
+        ...p,
+        role: roleMap.get(p.id) || "student"
+      })) as User[];
+      
+      setAllUsers(usersWithRoles || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -112,6 +137,54 @@ export default function AdminDashboard() {
       toast({
         title: "Success",
         description: "Complaint assigned successfully",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePromoteToStaff = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_roles")
+        .update({ role: "staff" })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User promoted to staff",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDemoteToStudent = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_roles")
+        .update({ role: "student" })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Staff demoted to student",
       });
 
       fetchData();
@@ -173,6 +246,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="assigned">
               Assigned ({assignedComplaints.length})
+            </TabsTrigger>
+            <TabsTrigger value="staff">
+              Staff Management
             </TabsTrigger>
           </TabsList>
 
@@ -260,6 +336,67 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="staff" className="mt-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Staff</CardTitle>
+                  <CardDescription>Users with staff role</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {staffMembers.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">No staff members yet</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {staffMembers.map((staff) => (
+                        <div key={staff.id} className="flex items-center justify-between p-3 border border-border rounded-md">
+                          <div>
+                            <p className="font-medium">{staff.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{staff.email}</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDemoteToStudent(staff.id)}
+                          >
+                            Demote
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Users</CardTitle>
+                  <CardDescription>Promote students to staff</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {allUsers
+                      .filter(user => user.role === "student")
+                      .map((user) => (
+                        <div key={user.id} className="flex items-center justify-between p-3 border border-border rounded-md">
+                          <div>
+                            <p className="font-medium">{user.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => handlePromoteToStaff(user.id)}
+                          >
+                            Promote to Staff
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
