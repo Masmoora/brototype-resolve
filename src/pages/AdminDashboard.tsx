@@ -43,6 +43,11 @@ export default function AdminDashboard() {
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [staffFilter, setStaffFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchData();
@@ -197,8 +202,21 @@ export default function AdminDashboard() {
     }
   };
 
-  const unassignedComplaints = complaints.filter(c => !c.assigned_to);
-  const assignedComplaints = complaints.filter(c => c.assigned_to);
+  // Filter complaints based on search and filters
+  const filteredComplaints = complaints.filter(complaint => {
+    const matchesSearch = 
+      searchQuery === "" ||
+      complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      complaint.student_profile?.full_name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || complaint.status === statusFilter;
+    const matchesStaff = staffFilter === "all" || complaint.assigned_to === staffFilter;
+    
+    return matchesSearch && matchesStatus && matchesStaff;
+  });
+
+  const unassignedComplaints = filteredComplaints.filter(c => !c.assigned_to);
+  const assignedComplaints = filteredComplaints.filter(c => c.assigned_to);
 
   return (
     <div className="min-h-screen bg-background">
@@ -208,6 +226,47 @@ export default function AdminDashboard() {
           <h2 className="text-3xl font-bold text-foreground">Admin Dashboard</h2>
           <p className="text-muted-foreground mt-1">Manage complaints and assign to staff</p>
         </div>
+
+        {/* Search and Filters */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-2">
+                <input
+                  type="text"
+                  placeholder="Search by title or student name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={staffFilter} onValueChange={setStaffFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by staff" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Staff</SelectItem>
+                  {staffMembers.map((staff) => (
+                    <SelectItem key={staff.id} value={staff.id}>
+                      {staff.full_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
@@ -275,13 +334,13 @@ export default function AdminDashboard() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground mb-4">{complaint.description}</p>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{complaint.description}</p>
                       <div className="flex gap-2 items-center">
                         <Select onValueChange={(value) => handleAssignStaff(complaint.id, value)}>
-                          <SelectTrigger className="w-[250px]">
-                            <SelectValue placeholder="Assign to staff" />
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Quick assign..." />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-popover z-50">
                             {staffMembers.map((staff) => (
                               <SelectItem key={staff.id} value={staff.id}>
                                 {staff.full_name}
@@ -312,28 +371,34 @@ export default function AdminDashboard() {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {assignedComplaints.map((complaint) => (
-                  <Card
-                    key={complaint.id}
-                    className="hover:shadow-medium transition-shadow cursor-pointer"
-                    onClick={() => navigate(`/complaint/${complaint.id}`)}
-                  >
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{complaint.title}</CardTitle>
-                          <CardDescription className="mt-1">
-                            From: {complaint.student_profile?.full_name || "Unknown"} • {new Date(complaint.created_at).toLocaleDateString()} • {complaint.category}
-                          </CardDescription>
+                {assignedComplaints.map((complaint) => {
+                  const assignedStaff = staffMembers.find(s => s.id === complaint.assigned_to);
+                  return (
+                    <Card
+                      key={complaint.id}
+                      className="hover:shadow-medium transition-shadow cursor-pointer"
+                      onClick={() => navigate(`/complaint/${complaint.id}`)}
+                    >
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{complaint.title}</CardTitle>
+                            <CardDescription className="mt-1">
+                              From: {complaint.student_profile?.full_name || "Unknown"} • 
+                              Assigned to: {assignedStaff?.full_name || "Unknown"} • 
+                              {new Date(complaint.created_at).toLocaleDateString()} • 
+                              {complaint.category}
+                            </CardDescription>
+                          </div>
+                          <StatusBadge status={complaint.status} />
                         </div>
-                        <StatusBadge status={complaint.status} />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{complaint.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{complaint.description}</p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>

@@ -38,10 +38,10 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --pending: 215 85% 55%;
+    --pending: 38 92% 50%;
     --pending-foreground: 0 0% 100%;
 
-    --in-progress: 38 92% 50%;
+    --in-progress: 215 85% 55%;
     --in-progress-foreground: 0 0% 100%;
 
     --resolved: 142 71% 45%;
@@ -106,10 +106,10 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --pending: 215 85% 55%;
+    --pending: 38 92% 50%;
     --pending-foreground: 0 0% 100%;
 
-    --in-progress: 38 92% 50%;
+    --in-progress: 215 85% 55%;
     --in-progress-foreground: 0 0% 100%;
 
     --resolved: 142 71% 45%;
