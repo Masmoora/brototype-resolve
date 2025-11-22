@@ -49,6 +49,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [staffFilter, setStaffFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   useEffect(() => {
     fetchData();
@@ -216,8 +217,26 @@ export default function AdminDashboard() {
     return matchesSearch && matchesStatus && matchesStaff;
   });
 
-  const unassignedComplaints = filteredComplaints.filter(c => !c.assigned_to);
-  const assignedComplaints = filteredComplaints.filter(c => c.assigned_to);
+  // Sort complaints
+  const sortedComplaints = [...filteredComplaints].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case "oldest":
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case "student":
+        const nameA = a.student_profile?.full_name || "";
+        const nameB = b.student_profile?.full_name || "";
+        return nameA.localeCompare(nameB);
+      case "title":
+        return a.title.localeCompare(b.title);
+      default:
+        return 0;
+    }
+  });
+
+  const unassignedComplaints = sortedComplaints.filter(c => !c.assigned_to);
+  const assignedComplaints = sortedComplaints.filter(c => c.assigned_to);
 
   // Analytics calculations
   const pendingCount = complaints.filter(c => c.status === "pending").length;
@@ -313,7 +332,7 @@ export default function AdminDashboard() {
         {/* Search and Filters */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="md:col-span-2">
                 <input
                   type="text"
@@ -345,6 +364,17 @@ export default function AdminDashboard() {
                       {staff.full_name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="student">Student Name</SelectItem>
+                  <SelectItem value="title">Title (A-Z)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
