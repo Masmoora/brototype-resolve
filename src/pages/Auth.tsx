@@ -72,17 +72,21 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-auth-purple p-4">
+    <div className="min-h-screen flex items-center justify-center bg-auth-bg p-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 flex justify-center">
-          <div className="bg-white p-3 rounded-lg">
-            <FileText className="h-8 w-8 text-auth-purple" />
+        <div className="mb-6 flex justify-center">
+          <div className="bg-auth-card p-3 rounded-xl shadow-lg">
+            <FileText className="h-10 w-10 text-primary" />
           </div>
         </div>
         
-        <h1 className="text-4xl md:text-5xl font-bold text-auth-orange text-center mb-8">
-          {isSignUp ? "Sign Up" : "Sign In"}
+        <h1 className="text-3xl font-bold text-white text-center mb-2">
+          BroDesk
         </h1>
+        
+        <h2 className="text-4xl md:text-5xl font-bold text-auth-accent text-center mb-8">
+          {isSignUp ? "Sign Up" : "Sign In"}
+        </h2>
         
         <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-6">
           {isSignUp && (
@@ -91,7 +95,7 @@ export default function Auth() {
                 name="fullName"
                 type="text"
                 placeholder="Full Name"
-                className="h-12 bg-white text-foreground placeholder:text-muted-foreground rounded-lg"
+                className="h-12 bg-auth-card text-foreground placeholder:text-muted-foreground rounded-lg border-border/20"
                 required
               />
             </div>
@@ -102,7 +106,7 @@ export default function Auth() {
               name="email"
               type="email"
               placeholder="Email"
-              className="h-12 bg-white text-foreground placeholder:text-muted-foreground rounded-lg"
+              className="h-12 bg-auth-card text-foreground placeholder:text-muted-foreground rounded-lg border-border/20"
               required
             />
           </div>
@@ -112,7 +116,7 @@ export default function Auth() {
               name="password"
               type="password"
               placeholder="Password"
-              className="h-12 bg-white text-foreground placeholder:text-muted-foreground rounded-lg"
+              className="h-12 bg-auth-card text-foreground placeholder:text-muted-foreground rounded-lg border-border/20"
               required
               minLength={6}
             />
@@ -121,10 +125,10 @@ export default function Auth() {
           {isSignUp && (
             <div className="space-y-2">
               <Select value={selectedRole} onValueChange={(value: "student" | "staff") => setSelectedRole(value)}>
-                <SelectTrigger className="h-12 bg-white text-foreground rounded-lg">
+                <SelectTrigger className="h-12 bg-auth-card text-foreground rounded-lg border-border/20">
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-auth-card border-border/20">
                   <SelectItem value="student">Student</SelectItem>
                   <SelectItem value="staff">Staff</SelectItem>
                 </SelectContent>
@@ -142,7 +146,7 @@ export default function Auth() {
           
           <Button 
             type="submit" 
-            className="w-full h-12 bg-auth-orange hover:bg-auth-orange/90 text-white font-semibold rounded-lg text-base"
+            className="w-full h-12 bg-auth-accent hover:bg-auth-accent/90 text-white font-semibold rounded-lg text-base shadow-lg hover:shadow-xl transition-all"
             disabled={isLoading}
           >
             {isLoading ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}

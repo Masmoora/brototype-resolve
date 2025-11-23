@@ -39,8 +39,9 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
-        "auth-purple": "hsl(var(--auth-purple))",
-        "auth-orange": "hsl(var(--auth-orange))",
+        "auth-bg": "hsl(var(--auth-bg))",
+        "auth-accent": "hsl(var(--auth-accent))",
+        "auth-card": "hsl(var(--auth-card))",
         pending: {
           DEFAULT: "hsl(var(--pending))",
           foreground: "hsl(var(--pending-foreground))",
