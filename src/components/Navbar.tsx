@@ -24,7 +24,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">BCMS - {getRoleTitle()}</h1>
+            <h1 className="text-xl font-bold text-foreground">BroDesk - {getRoleTitle()}</h1>
           </div>
           <Button onClick={signOut} variant="ghost" size="sm">
             <LogOut className="mr-2 h-4 w-4" />
