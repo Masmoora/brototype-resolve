@@ -524,7 +524,7 @@ export default function AdminDashboard() {
               Assigned ({assignedComplaints.length})
             </TabsTrigger>
             <TabsTrigger value="staff">
-              Staff Management
+              Staff Management ({staffMembers.length})
             </TabsTrigger>
           </TabsList>
 
