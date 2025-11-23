@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   userRole: UserRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: "student" | "staff") => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -72,11 +72,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: "student" | "staff" = "student") => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -87,7 +90,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       });
 
-      return { error };
+      if (error) {
+        return { error };
+      }
+
+      // Create profile and role
+      if (user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            email: user.email!,
+            full_name: fullName,
+          });
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+          return { error: profileError };
+        }
+
+        // Insert user role
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({
+            user_id: user.id,
+            role: role,
+          });
+
+        if (roleError) {
+          console.error("Error creating user role:", roleError);
+          return { error: roleError };
+        }
+      }
+
+      return { error: null };
     } catch (error: any) {
       return { error };
     }

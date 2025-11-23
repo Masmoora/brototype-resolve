@@ -38,6 +38,9 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
+    --auth-purple: 260 60% 30%;
+    --auth-orange: 35 100% 50%;
+
     --pending: 38 92% 50%;
     --pending-foreground: 0 0% 100%;
 
@@ -105,6 +108,9 @@ All colors MUST be HSL.
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+
+    --auth-purple: 260 60% 30%;
+    --auth-orange: 35 100% 50%;
 
     --pending: 38 92% 50%;
     --pending-foreground: 0 0% 100%;
