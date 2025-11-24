@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   userRole: UserRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: "student" | "staff") => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: "student" | "staff", phoneNumber: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: "student" | "staff" = "student") => {
+  const signUp = async (email: string, password: string, fullName: string, role: "student" | "staff" = "student", phoneNumber: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
-      // Create profile and role
+      // Create profile and role with approval status as pending
       if (user) {
         const { error: profileError } = await supabase
           .from("profiles")
@@ -102,6 +102,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: user.id,
             email: user.email!,
             full_name: fullName,
+            phone_number: phoneNumber,
+            approval_status: 'pending',
           });
 
         if (profileError) {
@@ -131,12 +133,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      return { error };
+      if (error) {
+        return { error };
+      }
+
+      // Check approval status
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("approval_status")
+          .eq("id", data.user.id)
+          .single();
+
+        if (profileError) {
+          return { error: profileError };
+        }
+
+        if (profileData.approval_status === 'pending') {
+          await supabase.auth.signOut();
+          return { error: { message: "Your account is pending approval by admin. Please wait for approval." } };
+        }
+
+        if (profileData.approval_status === 'rejected') {
+          await supabase.auth.signOut();
+          return { error: { message: "Your account has been rejected by admin." } };
+        }
+      }
+
+      return { error: null };
     } catch (error: any) {
       return { error };
     }

@@ -4,9 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { FileText } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,9 +50,33 @@ export default function Auth() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
     const fullName = formData.get("fullName") as string;
+    const phoneNumber = formData.get("phoneNumber") as string;
 
-    const { error } = await signUp(email, password, fullName, selectedRole);
+    // Validate password match
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate phone number (basic validation)
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid phone number",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await signUp(email, password, fullName, selectedRole, phoneNumber);
 
     if (error) {
       toast({
@@ -63,7 +87,7 @@ export default function Auth() {
     } else {
       toast({
         title: "Success",
-        description: "Account created successfully! You can now login.",
+        description: "Your account is pending approval by admin. You will receive an email notification once approved.",
       });
       setIsSignUp(false);
     }
@@ -72,100 +96,145 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-auth-bg p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 flex justify-center">
-          <div className="bg-auth-card p-3 rounded-xl shadow-lg">
-            <FileText className="h-10 w-10 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-accent/5 to-background p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="flex justify-center">
+            <h1 className="text-4xl font-bold text-primary">
+              BroDesk
+            </h1>
           </div>
-        </div>
+          
+          <CardTitle className="text-3xl font-bold text-foreground">
+            {isSignUp ? "Create Account" : "Welcome Back"}
+          </CardTitle>
+          <CardDescription className="text-base">
+            {isSignUp ? "Sign up to get started" : "Sign in to continue"}
+          </CardDescription>
+        </CardHeader>
         
-        <h1 className="text-3xl font-bold text-white text-center mb-2">
-          BroDesk
-        </h1>
-        
-        <h2 className="text-4xl md:text-5xl font-bold text-auth-accent text-center mb-8">
-          {isSignUp ? "Sign Up" : "Sign In"}
-        </h2>
-        
-        <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-6">
-          {isSignUp && (
+        <CardContent>
+          <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-5">
+            {isSignUp && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    className="h-11"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Mobile Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    placeholder="Enter your mobile number"
+                    className="h-11"
+                    required
+                    minLength={10}
+                  />
+                </div>
+              </>
+            )}
+            
             <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <Input
-                name="fullName"
-                type="text"
-                placeholder="Full Name"
-                className="h-12 bg-auth-card text-foreground placeholder:text-muted-foreground rounded-lg border-border/20"
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                className="h-11"
                 required
               />
             </div>
-          )}
-          
-          <div className="space-y-2">
-            <Input
-              name="email"
-              type="email"
-              placeholder="Email"
-              className="h-12 bg-auth-card text-foreground placeholder:text-muted-foreground rounded-lg border-border/20"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password"
-              className="h-12 bg-auth-card text-foreground placeholder:text-muted-foreground rounded-lg border-border/20"
-              required
-              minLength={6}
-            />
-          </div>
-
-          {isSignUp && (
+            
             <div className="space-y-2">
-              <Select value={selectedRole} onValueChange={(value: "student" | "staff") => setSelectedRole(value)}>
-                <SelectTrigger className="h-12 bg-auth-card text-foreground rounded-lg border-border/20">
-                  <SelectValue placeholder="Select Role" />
-                </SelectTrigger>
-                <SelectContent className="bg-auth-card border-border/20">
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                className="h-11"
+                required
+                minLength={6}
+              />
             </div>
-          )}
-          
-          {!isSignUp && (
-            <div className="text-center">
-              <button type="button" className="text-white text-sm underline hover:no-underline">
-                Forgot Password?
-              </button>
-            </div>
-          )}
-          
-          <Button 
-            type="submit" 
-            className="w-full h-12 bg-auth-accent hover:bg-auth-accent/90 text-white font-semibold rounded-lg text-base shadow-lg hover:shadow-xl transition-all"
-            disabled={isLoading}
-          >
-            {isLoading ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}
-          </Button>
-        </form>
-        
-        <div className="mt-6 text-center">
-          <p className="text-white">
-            {isSignUp ? "Already have an account? " : "Don't have an account? "}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-white font-semibold underline hover:no-underline"
+
+            {isSignUp && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Re-enter your password"
+                    className="h-11"
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Select Role</Label>
+                  <RadioGroup 
+                    value={selectedRole} 
+                    onValueChange={(value: "student" | "staff") => setSelectedRole(value)}
+                    className="flex gap-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="student" id="student" />
+                      <Label htmlFor="student" className="font-normal cursor-pointer">Student</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="staff" id="staff" />
+                      <Label htmlFor="staff" className="font-normal cursor-pointer">Staff</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </>
+            )}
+            
+            {!isSignUp && (
+              <div className="text-right">
+                <button type="button" className="text-sm text-primary hover:underline">
+                  Forgot Password?
+                </button>
+              </div>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full h-11 text-base font-semibold"
+              disabled={isLoading}
             >
-              {isSignUp ? "Sign In" : "Sign Up"}
-            </button>
-          </p>
-        </div>
-      </div>
+              {isLoading ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}
+            </Button>
+          </form>
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              {isSignUp ? "Already have an account? " : "Don't have an account? "}
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-primary font-semibold hover:underline"
+              >
+                {isSignUp ? "Sign In" : "Sign Up"}
+              </button>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

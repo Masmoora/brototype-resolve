@@ -84,24 +84,30 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_status: string | null
           created_at: string
           email: string
           full_name: string
           id: string
+          phone_number: string | null
           updated_at: string
         }
         Insert: {
+          approval_status?: string | null
           created_at?: string
           email: string
           full_name: string
           id: string
+          phone_number?: string | null
           updated_at?: string
         }
         Update: {
+          approval_status?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id?: string
+          phone_number?: string | null
           updated_at?: string
         }
         Relationships: []
