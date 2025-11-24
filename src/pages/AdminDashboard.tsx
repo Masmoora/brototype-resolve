@@ -34,7 +34,9 @@ type User = {
   id: string;
   full_name: string;
   email: string;
+  phone_number: string | null;
   role: "student" | "staff" | "admin";
+  approval_status: "pending" | "approved" | "rejected";
 };
 
 export default function AdminDashboard() {
@@ -105,7 +107,7 @@ export default function AdminDashboard() {
       // Fetch all users with their roles
       const { data: allProfilesData } = await supabase
         .from("profiles")
-        .select("id, full_name, email");
+        .select("id, full_name, email, phone_number, approval_status");
       
       const { data: allRolesData } = await supabase
         .from("user_roles")
@@ -114,7 +116,8 @@ export default function AdminDashboard() {
       const roleMap = new Map(allRolesData?.map(r => [r.user_id, r.role]) || []);
       const usersWithRoles = allProfilesData?.map(p => ({
         ...p,
-        role: roleMap.get(p.id) || "student"
+        role: roleMap.get(p.id) || "student",
+        approval_status: p.approval_status || "approved"
       })) as User[];
       
       setAllUsers(usersWithRoles || []);
@@ -192,6 +195,54 @@ export default function AdminDashboard() {
       toast({
         title: "Success",
         description: "Staff demoted to student",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleApproveUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ approval_status: "approved" })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User account approved successfully",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRejectUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ approval_status: "rejected" })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User account rejected",
       });
 
       fetchData();
@@ -515,18 +566,24 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="unassigned" className="w-full">
-          <TabsList>
-            <TabsTrigger value="unassigned">
-              Unassigned ({unassignedComplaints.length})
-            </TabsTrigger>
-            <TabsTrigger value="assigned">
-              Assigned ({assignedComplaints.length})
-            </TabsTrigger>
-            <TabsTrigger value="staff">
-              Staff Management ({staffMembers.length})
-            </TabsTrigger>
+        <Tabs defaultValue="complaints" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="complaints">Complaints</TabsTrigger>
+            <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="complaints">
+            <Tabs defaultValue="unassigned" className="w-full mt-4">
+              <TabsList>
+                <TabsTrigger value="unassigned">
+                  Unassigned ({unassignedComplaints.length})
+                </TabsTrigger>
+                <TabsTrigger value="assigned">
+                  Assigned ({assignedComplaints.length})
+                </TabsTrigger>
+              </TabsList>
 
           <TabsContent value="unassigned" className="mt-6">
             {unassignedComplaints.length === 0 ? (
@@ -620,7 +677,63 @@ export default function AdminDashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="staff" className="mt-6">
+            </Tabs>
+          </TabsContent>
+
+          <TabsContent value="approvals" className="space-y-4 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending User Approvals</CardTitle>
+                <CardDescription>
+                  Review and approve or reject user account requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {allUsers.filter(u => u.approval_status === 'pending').length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No pending approvals</p>
+                ) : (
+                  <div className="space-y-4">
+                    {allUsers.filter(u => u.approval_status === 'pending').map((user) => (
+                      <Card key={user.id} className="border-l-4 border-l-warning">
+                        <CardContent className="flex items-center justify-between p-4">
+                          <div className="space-y-1">
+                            <p className="font-medium text-foreground">{user.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                            {user.phone_number && (
+                              <p className="text-sm text-muted-foreground">Phone: {user.phone_number}</p>
+                            )}
+                            <p className="text-sm">
+                              <span className="font-medium">Role:</span>{" "}
+                              <span className="capitalize">{user.role}</span>
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => handleApproveUser(user.id)}
+                              className="bg-success hover:bg-success/90"
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleRejectUser(user.id)}
+                            >
+                              Reject
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">
               <Card>
                 <CardHeader>
@@ -654,18 +767,21 @@ export default function AdminDashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>All Users</CardTitle>
-                  <CardDescription>Promote students to staff</CardDescription>
+                  <CardTitle>All Approved Users</CardTitle>
+                  <CardDescription>Manage user roles and permissions</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {allUsers
-                      .filter(user => user.role === "student")
+                      .filter(user => user.approval_status === 'approved' && user.role === "student")
                       .map((user) => (
                         <div key={user.id} className="flex items-center justify-between p-3 border border-border rounded-md">
                           <div>
                             <p className="font-medium">{user.full_name}</p>
                             <p className="text-sm text-muted-foreground">{user.email}</p>
+                            {user.phone_number && (
+                              <p className="text-xs text-muted-foreground">Phone: {user.phone_number}</p>
+                            )}
                           </div>
                           <Button
                             size="sm"
@@ -679,6 +795,10 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <p className="text-muted-foreground text-center py-8">Analytics features coming soon</p>
           </TabsContent>
         </Tabs>
       </main>

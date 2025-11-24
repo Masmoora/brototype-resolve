@@ -110,7 +110,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="border-t bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p className="text-sm">© 2024 BroDesk. All rights reserved.</p>
+          <p className="text-sm">© 2025 BroDesk. All rights reserved.</p>
         </div>
       </footer>
     </div>
