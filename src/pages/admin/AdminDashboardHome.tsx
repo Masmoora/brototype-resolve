@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
+import { AdminSidebar } from "@/components/AdminSidebar";
 
 interface Stats {
   totalUsers: number;
@@ -45,9 +45,9 @@ export default function AdminDashboardHome() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto p-6">
+    <div className="min-h-screen bg-background flex">
+      <AdminSidebar />
+      <div className="flex-1 p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
           <p className="text-muted-foreground">Overview of system statistics</p>

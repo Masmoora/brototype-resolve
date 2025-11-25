@@ -77,6 +77,8 @@ export default function Auth() {
 
     const { error } = await signUp(email, password, fullName, selectedRole, phoneNumber);
 
+    setIsLoading(false);
+
     if (error) {
       toast({
         title: "Error",
@@ -85,13 +87,12 @@ export default function Auth() {
       });
     } else {
       toast({
-        title: "Success",
-        description: "Your account is pending approval by admin. You will receive an email notification once approved.",
+        title: "Account created successfully",
+        description: "Pending admin approval. You will be notified once approved.",
       });
+      // Switch to sign-in view
       setIsSignUp(false);
     }
-
-    setIsLoading(false);
   };
 
   return (

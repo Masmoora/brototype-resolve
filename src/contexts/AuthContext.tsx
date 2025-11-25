@@ -92,6 +92,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string, role: "student" | "staff" = "student", phoneNumber: string) => {
     try {
+      // Validate inputs
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        return { error: { message: "Invalid email format" } };
+      }
+      if (!phoneNumber.match(/^\d{7,15}$/)) {
+        return { error: { message: "Phone number must be 7-15 digits" } };
+      }
+      if (password.length < 6) {
+        return { error: { message: "Password must be at least 6 characters" } };
+      }
+      
       const redirectUrl = `${window.location.origin}/`;
       
       const {
@@ -141,6 +152,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error("Error creating user role:", roleError);
           return { error: roleError };
         }
+        
+        // Sign out immediately after signup to prevent auto-login
+        await supabase.auth.signOut();
       }
 
       return { error: null };
