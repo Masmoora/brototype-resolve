@@ -5,11 +5,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Landing from "./pages/Landing";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import StudentDashboard from "./pages/StudentDashboard";
-import StaffDashboard from "./pages/StaffDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+import StudentHome from "./pages/student/StudentHome";
+import SubmitComplaint from "./pages/student/SubmitComplaint";
+import StudentComplaints from "./pages/student/StudentComplaints";
+import StaffHome from "./pages/staff/StaffHome";
+import StaffComplaints from "./pages/staff/StaffComplaints";
+import AdminDashboardHome from "./pages/admin/AdminDashboardHome";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminComplaints from "./pages/admin/AdminComplaints";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import NotFound from "./pages/NotFound";
 
@@ -24,12 +28,25 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/dashboard" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/student" element={<StudentDashboard />} />
-            <Route path="/staff" element={<StaffDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            
+            {/* Student Routes */}
+            <Route path="/student/home" element={<StudentHome />} />
+            <Route path="/student/submit-complaint" element={<SubmitComplaint />} />
+            <Route path="/student/complaints" element={<StudentComplaints />} />
+            
+            {/* Staff Routes */}
+            <Route path="/staff/home" element={<StaffHome />} />
+            <Route path="/staff/complaints" element={<StaffComplaints />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboardHome />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/complaints" element={<AdminComplaints />} />
+            
+            {/* Shared Routes */}
             <Route path="/complaint/:id" element={<ComplaintDetail />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
