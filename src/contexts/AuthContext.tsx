@@ -48,7 +48,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserRole(session.user.id).finally(() => setLoading(false));
+        fetchUserRole(session.user.id).finally(() => {
+          setLoading(false);
+          // Redirect to appropriate dashboard after role is loaded
+          if (window.location.pathname === "/auth") {
+            fetchUserRole(session.user.id);
+          }
+        });
       } else {
         setLoading(false);
       }
@@ -67,6 +73,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
       setUserRole(data.role as UserRole);
+      
+      // Navigate to appropriate dashboard after role is set
+      if (window.location.pathname === "/auth" || window.location.pathname === "/") {
+        const role = data.role as UserRole;
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (role === "staff") {
+          navigate("/staff/home");
+        } else if (role === "student") {
+          navigate("/student/home");
+        }
+      }
     } catch (error) {
       console.error("Error fetching user role:", error);
     }

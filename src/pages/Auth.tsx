@@ -32,15 +32,14 @@ export default function Auth() {
         description: error.message,
         variant: "destructive",
       });
+      setIsLoading(false);
     } else {
       toast({
         title: "Success",
         description: "Logged in successfully",
       });
-      navigate("/");
+      // Navigation will be handled by AuthContext after role is fetched
     }
-
-    setIsLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
