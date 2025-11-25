@@ -28,29 +28,73 @@ export default function SubmitComplaint() {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
 
-    const { error } = await supabase.from("complaints").insert([{
-      student_id: user?.id!,
-      title,
-      description,
-      category: category as "academic" | "infrastructure" | "administrative" | "technical" | "other",
-      status: "pending",
-    }]);
-
-    if (error) {
+    // Validation
+    if (!title || title.trim().length === 0) {
       toast({
-        title: "Error",
-        description: "Failed to submit complaint. Please try again.",
+        title: "Validation Error",
+        description: "Title is required",
         variant: "destructive",
       });
-    } else {
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!description || description.trim().length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Description is required",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!category) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a category",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit a complaint",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("complaints").insert([{
+        student_id: user.id,
+        title: title.trim(),
+        description: description.trim(),
+        category: category as "academic" | "infrastructure" | "administrative" | "technical" | "other",
+        status: "pending",
+      }]);
+
+      if (error) throw error;
+
       toast({
         title: "Success",
         description: "Complaint submitted successfully!",
       });
       navigate("/student/complaints");
+    } catch (error: any) {
+      console.error("Error submitting complaint:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit complaint. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (

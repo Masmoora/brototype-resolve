@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
-import { Navbar } from "@/components/Navbar";
+import { AdminSidebar } from "@/components/AdminSidebar";
 
 interface Complaint {
   id: string;
@@ -90,9 +90,9 @@ export default function AdminComplaints() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto p-6">
+    <div className="min-h-screen bg-background flex">
+      <AdminSidebar />
+      <div className="flex-1 p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Complaint Management</h1>
           <p className="text-muted-foreground">View and manage all complaints</p>
