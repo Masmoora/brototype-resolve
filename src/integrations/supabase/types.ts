@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           complaint_id: string
@@ -52,7 +76,9 @@ export type Database = {
           category: Database["public"]["Enums"]["complaint_category"]
           created_at: string
           description: string
+          file_url: string | null
           id: string
+          priority: string | null
           status: Database["public"]["Enums"]["complaint_status"]
           student_id: string
           title: string
@@ -63,7 +89,9 @@ export type Database = {
           category: Database["public"]["Enums"]["complaint_category"]
           created_at?: string
           description: string
+          file_url?: string | null
           id?: string
+          priority?: string | null
           status?: Database["public"]["Enums"]["complaint_status"]
           student_id: string
           title: string
@@ -74,7 +102,9 @@ export type Database = {
           category?: Database["public"]["Enums"]["complaint_category"]
           created_at?: string
           description?: string
+          file_url?: string | null
           id?: string
+          priority?: string | null
           status?: Database["public"]["Enums"]["complaint_status"]
           student_id?: string
           title?: string

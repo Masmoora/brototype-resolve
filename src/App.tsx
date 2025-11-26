@@ -15,6 +15,9 @@ import AdminDashboardHome from "./pages/admin/AdminDashboardHome";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminComplaints from "./pages/admin/AdminComplaints";
 import AdminStaff from "./pages/admin/AdminStaff";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +48,9 @@ const App = () => (
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/staff" element={<AdminStaff />} />
             <Route path="/admin/complaints" element={<AdminComplaints />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
             
             {/* Shared Routes */}
             <Route path="/complaint/:id" element={<ComplaintDetail />} />
