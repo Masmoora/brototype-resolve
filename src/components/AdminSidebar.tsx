@@ -25,32 +25,24 @@ export function AdminSidebar() {
       path: "/admin/dashboard" 
     },
     { 
-      title: "Users", 
+      title: "User Management", 
       icon: Users, 
-      path: "/admin/users",
-      subItems: [
-        { title: "Students", path: "/admin/users?type=students" },
-        { title: "Staff", path: "/admin/users?type=staff" }
-      ]
-    },
-    { 
-      title: "Complaints", 
-      icon: FileText, 
-      path: "/admin/complaints",
-      subItems: [
-        { title: "All Complaints", path: "/admin/complaints" },
-        { title: "Assign Complaints", path: "/admin/complaints/assign" }
-      ]
-    },
-    { 
-      title: "Categories", 
-      icon: FolderKanban, 
-      path: "/admin/categories" 
+      path: "/admin/users"
     },
     { 
       title: "Staff Management", 
       icon: UserCog, 
       path: "/admin/staff" 
+    },
+    { 
+      title: "Complaint Management", 
+      icon: FileText, 
+      path: "/admin/complaints"
+    },
+    { 
+      title: "Category Management", 
+      icon: FolderKanban, 
+      path: "/admin/categories" 
     },
     { 
       title: "Notifications", 
@@ -68,39 +60,19 @@ export function AdminSidebar() {
       
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => (
-          <div key={item.path}>
-            <Link
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                location.pathname === item.path
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-accent"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.title}</span>
-            </Link>
-            
-            {item.subItems && (
-              <div className="ml-8 mt-1 space-y-1">
-                {item.subItems.map((subItem) => (
-                  <Link
-                    key={subItem.path}
-                    to={subItem.path}
-                    className={cn(
-                      "block px-4 py-2 text-sm rounded-lg transition-colors",
-                      location.pathname + location.search === subItem.path
-                        ? "text-primary font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    {subItem.title}
-                  </Link>
-                ))}
-              </div>
+          <Link
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+              location.pathname === item.path
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground hover:bg-accent"
             )}
-          </div>
+          >
+            <item.icon className="h-5 w-5" />
+            <span className="font-medium">{item.title}</span>
+          </Link>
         ))}
       </nav>
       

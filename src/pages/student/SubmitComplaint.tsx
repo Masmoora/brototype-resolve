@@ -75,6 +75,7 @@ export default function SubmitComplaint() {
         title: title.trim(),
         description: description.trim(),
         category: category as "academic" | "infrastructure" | "administrative" | "technical" | "other",
+        priority: priority || "medium",
         status: "pending",
       }]);
 

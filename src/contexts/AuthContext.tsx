@@ -96,8 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         return { error: { message: "Invalid email format" } };
       }
-      if (!phoneNumber.match(/^\d{7,15}$/)) {
-        return { error: { message: "Phone number must be 7-15 digits" } };
+      if (!phoneNumber.match(/^\d{10}$/)) {
+        return { error: { message: "Phone number must be exactly 10 digits" } };
       }
       if (password.length < 6) {
         return { error: { message: "Password must be at least 6 characters" } };
